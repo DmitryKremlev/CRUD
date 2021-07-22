@@ -1,8 +1,11 @@
 package springcourse.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import springcourse.dao.PersonDao;
+import springcourse.dao.PersonDaoImpl;
 import springcourse.models.User;
 
 import javax.persistence.EntityManager;
@@ -15,40 +18,28 @@ import java.util.List;
 @Transactional
 @Component
 @Repository
-public class UserServiceImpl implements UserService{
-    @PersistenceContext
-    private EntityManager entityManager;
+public class UserServiceImpl {
 
-
+    @Autowired
+    private PersonDao personDao;
     public List<User> index() {
-        return entityManager.createQuery("SELECT p FROM User p", User.class).getResultList();
+        return personDao.index();
     }
 
     public User show(int id) {
-        TypedQuery<User> query = entityManager.createQuery("SELECT p FROM User p where p.id = : id", User.class);
-        query.setParameter("id", id);
-        return query.getResultList().stream().findAny().orElse(null);
+        return personDao.show(id);
     }
 
     public void save(User user) {
-        entityManager.persist(user);
+        personDao.save(user);
     }
 
     public void update(int id, User updatedPerson) {
-        User personToBeUpdated = show(id);
-
-        personToBeUpdated.setName(updatedPerson.getName());
-        personToBeUpdated.setAge(updatedPerson.getAge());
-        personToBeUpdated.setEmail(updatedPerson.getEmail());
-
-        entityManager.createQuery("update User p set p.name =: name, p.age =: age, p.email =: email where p.id=:id")
-                .setParameter("id", id)
-                .setParameter("name", updatedPerson.getName())
-                .setParameter("age", updatedPerson.getAge())
-                .setParameter("email", updatedPerson.getEmail()).executeUpdate();
+        personDao.update(id, updatedPerson);
     }
 
     public void delete(int id) {
-        entityManager.createQuery("delete from User p where p.id=:id").setParameter("id", id).executeUpdate();
+        personDao.delete(id);
     }
+
 }
